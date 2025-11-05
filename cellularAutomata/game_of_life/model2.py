@@ -32,6 +32,7 @@ class ConwaysGameOfLife(Model):
         # Non-wrapping grid; we only look at cells above, so edges are DEAD
         self.grid = OrthogonalMooreGrid((width, height), capacity=1, torus=False)
 
+        # Coordinate -> agent lookup for fast access
         self.agent_at = {}
 
         for cell in self.grid.all_cells:
