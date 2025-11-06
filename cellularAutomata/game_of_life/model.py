@@ -5,33 +5,25 @@ from .agent import Cell
 
 class ConwaysGameOfLife(Model):
     """
-    2D cellular automaton updated top-down using the three cells above
-    each position (Rule 90 mapping). The top row is initialized randomly
-    and remains the seed for computing the rows below in sequence.
+    Autómata celular 2D que se actualiza de arriba hacia abajo
+    usando las tres celdas superiores (mapeo tipo Regla 90).
+    La fila superior se inicializa aleatoriamente y actúa como semilla
+    para calcular en secuencia las filas inferiores.
     """
     def __init__(self, width=50, height=50, initial_fraction_alive=0.2, seed=None):
-        """Create a new playing area of (width, height) cells.
-        - Only the top row (y==height-1) is initialized randomly using
-          `initial_fraction_alive`.
-        - Remaining rows start DEAD.
-        - Grid does not wrap (torus=False); out-of-bounds neighbors are DEAD.
+        """Crea un área de (width, height) celdas.
+        - Solo la fila superior (y==height-1) se inicializa aleatoriamente
+          con `initial_fraction_alive`.
+        - El resto de las filas inicia muerta.
+        - Grid sin wrap (torus=False); fuera de límites se considera muerto.
         """
         super().__init__(seed=seed)
 
-        """Grid where cells are connected to their 8 neighbors.
-
-        Example for two dimensions:
-        directions = [
-            (-1, -1), (-1, 0), (-1, 1),
-            ( 0, -1),          ( 0, 1),
-            ( 1, -1), ( 1, 0), ( 1, 1),
-        ]
-        """
         self.width = width
         self.height = height
-        # Non-wrapping grid; we only look at cells above, so edges are DEAD
+        # Grid sin wrap
         self.grid = OrthogonalMooreGrid((width, height), capacity=1, torus=False)
-
+        # Crea un agente por celda
         self.agent_at = {}
 
         for cell in self.grid.all_cells:
@@ -48,19 +40,10 @@ class ConwaysGameOfLife(Model):
 
     def step(self):
         """
-        Create one new row per tick using the three cells above it (visual top → bottom).
-        The top row (y==height-1) is the initial seed and never changes. Edges are DEAD (0).
+        Crea una nueva fila por tick usando las tres celdas superiores (visual arriba → abajo).
+        La fila superior (y==height-1) es la semilla y no cambia. Bordes cuentan como 0 (muerto).
         """
-    
-        def get_above_states(x, y_minus_1):
-            left = self.agent_at.get((x - 1, y_minus_1))
-            mid = self.agent_at.get((x, y_minus_1))
-            right = self.agent_at.get((x + 1, y_minus_1))
-            sl = left.state if left is not None else Cell.DEAD
-            sm = mid.state if mid is not None else Cell.DEAD
-            sr = right.state if right is not None else Cell.DEAD
-            return sl, sm, sr
-        # Rule mapping for the three above cells to new state
+        # Mapeo de tres celdas superiores = nuevo estado
         rule_map = {
             (1, 1, 1): 0,
             (1, 1, 0): 1,
